@@ -2,11 +2,12 @@ package usecase
 
 import (
 	"../infrastructure"
+	"log"
 )
 
 type UserService interface {
-	GetUsers() []string
-	GetUser(name string) []string
+	GetUsers() []UserResponse
+	GetUser(name string) UserResponse
 }
 
 type userServiceImpl struct {
@@ -17,10 +18,35 @@ func CreateUserService(repository infrastructure.UserRepository) UserService {
 	return &userServiceImpl{repository}
 }
 
-func (service *userServiceImpl) GetUsers() []string {
-	return service.repo.GetUsers()
+func (service *userServiceImpl) GetUsers() []UserResponse {
+	users, err := service.repo.GetUsers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var userResponses []UserResponse
+	for _, u := range users {
+		res := UserResponse{
+			Id:   u.Id,
+			Name: u.Name,
+			Age:  u.Age,
+		}
+		userResponses = append(userResponses, res)
+	}
+
+	return userResponses
 }
 
-func (service *userServiceImpl) GetUser(name string) []string {
-	return service.repo.GetUser(name)
+func (service *userServiceImpl) GetUser(name string) UserResponse {
+
+	user, err := service.repo.GetUser(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return UserResponse{
+		Id:   user.Id,
+		Name: user.Name,
+		Age:  user.Age,
+	}
 }

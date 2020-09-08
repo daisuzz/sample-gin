@@ -1,26 +1,49 @@
 package infrastructure
 
-type Users []string
+import "errors"
+
+type Users []User
 
 type UserRepository interface {
-	GetUsers() Users
-	GetUser(name string) Users
+	GetUsers() (Users, error)
+	GetUser(name string) (User, error)
 }
 
 type userRepositoryImpl struct {
-	Users
+	users Users
 }
 
 func CreateUserRepository() UserRepository {
 	return &userRepositoryImpl{
-		Users: []string{"ichiro", "jiro"},
+		users: []User{
+			{
+				Id:   "1",
+				Name: "Ichiro",
+				Age:  20,
+			},
+			{
+				Id:   "2",
+				Name: "Jiro",
+				Age:  30,
+			},
+		},
 	}
 }
 
-func (u *userRepositoryImpl) GetUsers() Users {
-	return u.Users
+func (u *userRepositoryImpl) GetUsers() (Users, error) {
+	return u.users, nil
 }
 
-func (u *userRepositoryImpl) GetUser(name string) Users {
-	return u.Users
+func (u *userRepositoryImpl) GetUser(id string) (User, error) {
+
+	for _, u := range u.users {
+		if u.Id == id {
+			return u, nil
+		}
+	}
+
+	return User{}, ErrorNotFound
+
 }
+
+var ErrorNotFound = errors.New("not found")
